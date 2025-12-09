@@ -2,13 +2,11 @@
 
 plugins {
     id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-
-    // Plugin Flutter
-    id("dev.flutter.flutter-gradle-plugin")
-
-    // Plugin Firebase Google Services
+    // Plugin Google Services untuk Firebase
     id("com.google.gms.google-services")
+    id("org.jetbrains.kotlin.android")
+    // Plugin Flutter (harus terakhir)
+    id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
@@ -26,13 +24,18 @@ android {
     }
 
     buildTypes {
-        debug {
+        // 🔹 Debug build: tidak perlu shrink / proguard
+        getByName("debug") {
             isMinifyEnabled = false
+            isShrinkResources = false
         }
-        release {
-            isMinifyEnabled = false
+
+        // 🔹 Release build: shrink + minify keduanya ON (supaya AGP tidak protes)
+        getByName("release") {
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
-                getDefaultProguardFile("proguard-android.txt"),
+                getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
         }
@@ -49,15 +52,11 @@ android {
 }
 
 dependencies {
-    // ⭐ Firebase Messaging (Push Notifications)
+    // Firebase Messaging (push notification)
     implementation("com.google.firebase:firebase-messaging-ktx:23.4.1")
-
-    // ⭐ Firebase Core
+    // Firebase Analytics (opsional, tapi aman)
     implementation("com.google.firebase:firebase-analytics-ktx")
 
-    // Fix multidex
+    // Multidex untuk keamanan
     implementation("androidx.multidex:multidex:2.0.1")
 }
-
-// ⭐ Required: Apply Google Services to load google-services.json
-apply(plugin = "com.google.gms.google-services")
