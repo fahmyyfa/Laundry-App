@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:joyspin_laundry/core/theme.dart';
+import 'package:joyspin_laundry/core/constants.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -9,43 +9,55 @@ class OnboardingPage extends StatefulWidget {
 }
 
 class _OnboardingPageState extends State<OnboardingPage> {
-  final _pageController = PageController();
-  int _currentIndex = 0;
+  late final PageController _controller;
+  int _currentPage = 0;
 
   final _pages = const [
-    _OnboardModel(
+    (
       title: 'Cepat & Mudah',
       description: 'Pesan layanan laundry hanya dalam beberapa langkah.',
       icon: Icons.local_laundry_service_rounded,
     ),
-    _OnboardModel(
-      title: 'Pickup & Antar',
+    (
+      title: 'Antar Jemput',
       description:
-          'Kurir akan menjemput dan mengantar kembali pakaianmu tepat waktu.',
+          'Kurir menjemput dan mengantarkan kembali pakaianmu tepat waktu.',
       icon: Icons.delivery_dining_rounded,
     ),
-    _OnboardModel(
-      title: 'Tracking Real-time',
-      description:
-          'Pantau status cucianmu: dijemput, dicuci, disetrika hingga selesai.',
-      icon: Icons.timelapse_rounded,
+    (
+      title: 'Tracking Pesanan',
+      description: 'Pantau status cucianmu secara real-time dari aplikasi.',
+      icon: Icons.show_chart_rounded,
     ),
   ];
 
-  void _goNext() {
-    if (_currentIndex < _pages.length - 1) {
-      _pageController.nextPage(
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeOutCubic,
-      );
-    } else {
-      // TODO: arahkan ke login / home sesuai alurmu
-      Navigator.of(context).pushReplacementNamed('/login');
-    }
+  @override
+  void initState() {
+    super.initState();
+    _controller = PageController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   void _skip() {
-    Navigator.of(context).pushReplacementNamed('/login');
+    // ⬇️ PENTING: gunakan route dari AppConstants
+    Navigator.of(context).pushReplacementNamed(AppConstants.routeLogin);
+  }
+
+  void _next() {
+    if (_currentPage == _pages.length - 1) {
+      // Halaman terakhir → arahkan ke login
+      Navigator.of(context).pushReplacementNamed(AppConstants.routeLogin);
+    } else {
+      _controller.nextPage(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
   }
 
   @override
@@ -53,13 +65,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      // pakai warna surface (bukan background yang deprecated)
+      backgroundColor: AppColors.surface,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           child: Column(
             children: [
-              // Top bar: Skip
+              // Top bar: tombol Skip
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
@@ -71,116 +84,88 @@ class _OnboardingPageState extends State<OnboardingPage> {
               // PageView
               Expanded(
                 child: PageView.builder(
-                  controller: _pageController,
+                  controller: _controller,
                   itemCount: _pages.length,
                   onPageChanged: (index) {
-                    setState(() => _currentIndex = index);
+                    setState(() => _currentPage = index);
                   },
                   itemBuilder: (context, index) {
                     final page = _pages[index];
-                    return _OnboardSlide(model: page);
-                  },
-                ),
-              ),
-              const SizedBox(height: 12),
-              // Indicator
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  _pages.length,
-                  (index) {
-                    final selected = index == _currentIndex;
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      height: 8,
-                      width: selected ? 22 : 8,
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? AppColors.primary
-                            : AppColors.primarySoft,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Ilustrasi lingkaran
+                        Container(
+                          height: 200,
+                          width: 200,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColors.primarySoft,
+                          ),
+                          child: Icon(
+                            page.icon,
+                            size: 96,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        Text(
+                          page.title,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textMain,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          page.description,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
                     );
                   },
                 ),
               ),
               const SizedBox(height: 24),
-              // CTA
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: _goNext,
-                  child: Text(
-                    _currentIndex == _pages.length - 1
-                        ? 'Mulai Sekarang'
-                        : 'Lanjut',
+              // Dot indicator
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  _pages.length,
+                  (index) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    height: 6,
+                    width: _currentPage == index ? 18 : 6,
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      color: _currentPage == index
+                          ? AppColors.primary
+                          : AppColors.primarySoft,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
                   ),
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 24),
+              // Tombol bawah: Lanjut / Mulai
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: _next,
+                  child: Text(
+                    _currentPage == _pages.length - 1 ? 'Mulai' : 'Lanjut',
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
             ],
           ),
         ),
       ),
-    );
-  }
-}
-
-class _OnboardModel {
-  final String title;
-  final String description;
-  final IconData icon;
-
-  const _OnboardModel({
-    required this.title,
-    required this.description,
-    required this.icon,
-  });
-}
-
-class _OnboardSlide extends StatelessWidget {
-  final _OnboardModel model;
-
-  const _OnboardSlide({required this.model});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Column(
-      children: [
-        const Spacer(),
-        // Illustration circle
-        Container(
-          height: 220,
-          width: 220,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppColors.primarySoft,
-          ),
-          child: Center(
-            child: Icon(
-              model.icon,
-              size: 120,
-              color: AppColors.primary,
-            ),
-          ),
-        ),
-        const SizedBox(height: 32),
-        Text(
-          model.title,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.displayLarge,
-        ),
-        const SizedBox(height: 12),
-        Text(
-          model.description,
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodyMedium,
-        ),
-        const Spacer(flex: 2),
-      ],
     );
   }
 }

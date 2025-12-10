@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:joyspin_laundry/core/theme.dart';
+import 'package:joyspin_laundry/core/constants.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -53,14 +54,14 @@ class HomePage extends StatelessWidget {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async {
-            // TODO: panggil refresh data dari backend
+            // TODO: panggil refresh data dari backend (Supabase)
             await Future<void>.delayed(const Duration(milliseconds: 700));
           },
           child: ListView(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
             children: [
               if (hasActiveOrder) ...[
-                _ActiveOrderCard(
+                const _ActiveOrderCard(
                   orderId: '#123456',
                   status: 'Sedang Dicuci',
                   progress: 0.6,
@@ -68,19 +69,19 @@ class HomePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
               ],
-              _PromoBanner(
+              const _PromoBanner(
                 title: 'Diskon 30% untuk pelanggan baru',
                 subtitle: 'Gunakan kode FRESH30 saat checkout.',
               ),
               const SizedBox(height: 20),
-              _ServiceGrid(),
+              const _ServiceGrid(),
               const SizedBox(height: 24),
               Text(
                 'Ringkasan Pesanan Terakhir',
                 style: theme.textTheme.titleLarge,
               ),
               const SizedBox(height: 12),
-              _LastOrdersSection(),
+              const _LastOrdersSection(),
               const SizedBox(height: 100),
             ],
           ),
@@ -93,8 +94,8 @@ class HomePage extends StatelessWidget {
           width: double.infinity,
           child: FilledButton.icon(
             onPressed: () {
-              // TODO: arahkan ke flow buat pesanan baru
-              Navigator.of(context).pushNamed('/order/new');
+              // Arahkan ke flow buat pesanan baru
+              Navigator.of(context).pushNamed(AppConstants.routeOrderNew);
             },
             icon: const Icon(Icons.add_rounded),
             label: const Text('Mulai Pesanan Baru'),
@@ -166,8 +167,10 @@ class _ActiveOrderCard extends StatelessWidget {
                         .copyWith(color: Colors.white),
                   ),
                   backgroundColor: AppColors.primary,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 0,
+                  ),
                 ),
               ],
             ),
@@ -182,8 +185,11 @@ class _ActiveOrderCard extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                const Icon(Icons.access_time_rounded,
-                    size: 18, color: AppColors.textSecondary),
+                const Icon(
+                  Icons.access_time_rounded,
+                  size: 18,
+                  color: AppColors.textSecondary,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   eta,
@@ -192,8 +198,8 @@ class _ActiveOrderCard extends StatelessWidget {
                 const Spacer(),
                 TextButton(
                   onPressed: () {
-                    // TODO: arahkan ke halaman tracking
-                    Navigator.of(context).pushNamed('/tracking');
+                    // Arahkan ke halaman tracking
+                    Navigator.of(context).pushNamed(AppConstants.routeTracking);
                   },
                   child: const Text('Lihat Detail'),
                 ),
@@ -245,7 +251,7 @@ class _PromoBanner extends StatelessWidget {
                 Text(
                   subtitle,
                   style: theme.textTheme.bodyMedium!.copyWith(
-                    color: Colors.white.withOpacity(0.9),
+                    color: Colors.white.withValues(alpha: 230), // ~0.9
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -253,7 +259,7 @@ class _PromoBanner extends StatelessWidget {
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white,
                     side: BorderSide(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 204), // ~0.8
                     ),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 16,
@@ -284,6 +290,8 @@ class _PromoBanner extends StatelessWidget {
 }
 
 class _ServiceGrid extends StatelessWidget {
+  const _ServiceGrid();
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -332,16 +340,18 @@ class _ServiceGrid extends StatelessWidget {
             final item = services[index];
             return GestureDetector(
               onTap: () {
-                // TODO: langsung mulai pesanan dengan layanan tersebut
+                // Mulai pesanan dengan layanan tersebut
                 Navigator.of(context).pushNamed(
-                  '/order/new',
+                  AppConstants.routeOrderNew,
                   arguments: item.title,
                 );
               },
               child: Card(
                 child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 14,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -382,6 +392,8 @@ class _ServiceGrid extends StatelessWidget {
 }
 
 class _LastOrdersSection extends StatelessWidget {
+  const _LastOrdersSection();
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -399,8 +411,10 @@ class _LastOrdersSection extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 10),
               child: Card(
                 child: ListTile(
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 8,
+                  ),
                   leading: Container(
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
@@ -426,8 +440,9 @@ class _LastOrdersSection extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         o.$4,
-                        style: theme.textTheme.bodyMedium!
-                            .copyWith(color: AppColors.textSecondary),
+                        style: theme.textTheme.bodyMedium!.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                     ],
                   ),

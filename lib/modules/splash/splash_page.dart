@@ -12,19 +12,27 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
+  Timer? _timer;
+
   @override
   void initState() {
     super.initState();
 
-    // Delay 2 detik lalu cek apakah user sudah login
-    Timer(const Duration(seconds: 2), () {
-      // TODO: kalau nanti sudah ada cek token login, arahkan ke home
-      // untuk sekarang langsung ke onboarding
+    // Timer 2 detik lalu pindah ke onboarding
+    _timer = Timer(const Duration(seconds: 2), () {
+      // Penting: cek mounted dulu sebelum pakai context
+      if (!mounted) return;
       Navigator.pushReplacementNamed(
         context,
         AppConstants.routeOnboarding,
       );
     });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -53,15 +61,20 @@ class _SplashPageState extends State<SplashPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             Text(
               'JoySpin Laundry',
-              style: theme.textTheme.displayLarge,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: AppColors.textMain,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Cepat, rapi, dan wangi ✨',
-              style: theme.textTheme.bodyMedium,
+              'Cepat, rapi, dan praktis ✨',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ),
