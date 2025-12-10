@@ -1,7 +1,7 @@
 // android/settings.gradle.kts
 
 pluginManagement {
-    // 🔹 Ambil lokasi Flutter SDK dari local.properties
+    // Ambil lokasi Flutter SDK dari local.properties
     val flutterSdkPath = run {
         val properties = java.util.Properties()
         file("local.properties").inputStream().use { properties.load(it) }
@@ -10,7 +10,7 @@ pluginManagement {
         flutterSdkPath
     }
 
-    // 🔹 Di sinilah Gradle menemukan plugin Flutter (flutter-plugin-loader)
+    // Gradle akan menemukan plugin Flutter dari sini
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
 
     repositories {
@@ -21,14 +21,16 @@ pluginManagement {
 }
 
 plugins {
-    // ⭐ Wajib: settings plugin Flutter
+    // Wajib: plugin loader Flutter
     id("dev.flutter.flutter-plugin-loader") version "1.0.0"
 
-    // Android & Kotlin Gradle Plugin
-    id("com.android.application") version "8.2.1" apply false
-    id("org.jetbrains.kotlin.android") version "1.9.22" apply false
+    // Android Gradle Plugin (AGP) – versi baru yang cocok dengan core-ktx 1.17.0, dll
+    id("com.android.application") version "8.9.1" apply false
 
-    // ⭐ Firebase Google Services (untuk google-services.json)
+    // Kotlin untuk Android (versi 2.x, sesuai rekomendasi Flutter terbaru)
+    id("org.jetbrains.kotlin.android") version "2.0.0" apply false
+
+    // Plugin Google Services untuk Firebase
     id("com.google.gms.google-services") version "4.4.2" apply false
 }
 
