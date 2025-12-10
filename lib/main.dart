@@ -30,7 +30,7 @@ class JoySpinApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'JoySpin Laundry',
-      theme: AppTheme.lightTheme,
+      theme: AppTheme.light(),
       debugShowCheckedModeBanner: false,
       initialRoute: AppConstants.routeSplash,
       routes: {

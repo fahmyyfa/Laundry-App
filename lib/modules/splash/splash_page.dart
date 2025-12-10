@@ -1,8 +1,8 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../core/constants.dart';
-import '../../core/theme.dart';
+import 'package:joyspin_laundry/core/constants.dart';
+import 'package:joyspin_laundry/core/theme.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -15,30 +15,55 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 2), _checkAuth);
-  }
 
-  Future<void> _checkAuth() async {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (!mounted) return;
-    if (user != null) {
-      Navigator.pushReplacementNamed(context, AppConstants.routeHome);
-    } else {
-      Navigator.pushReplacementNamed(context, AppConstants.routeOnboarding);
-    }
+    // Delay 2 detik lalu cek apakah user sudah login
+    Timer(const Duration(seconds: 2), () {
+      // TODO: kalau nanti sudah ada cek token login, arahkan ke home
+      // untuk sekarang langsung ke onboarding
+      Navigator.pushReplacementNamed(
+        context,
+        AppConstants.routeOnboarding,
+      );
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      backgroundColor: AppColors.surface,
       body: Center(
-        child: Text(
-          'JoySpin Laundry',
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.primaryBlue,
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Logo lingkaran biru
+            Container(
+              height: 120,
+              width: 120,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primarySoft,
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.local_laundry_service_rounded,
+                  size: 64,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'JoySpin Laundry',
+              style: theme.textTheme.displayLarge,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Cepat, rapi, dan wangi ✨',
+              style: theme.textTheme.bodyMedium,
+            ),
+          ],
         ),
       ),
     );
