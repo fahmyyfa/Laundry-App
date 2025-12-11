@@ -1,94 +1,209 @@
 import 'package:flutter/material.dart';
-import '../../core/constants.dart';
-import '../../data/models/service.dart';
-import '../../data/services/order_service.dart';
+import 'package:joyspin_laundry/core/constants.dart';
+import 'package:joyspin_laundry/core/theme.dart';
 
-class OrderSummaryPage extends StatefulWidget {
+class OrderSummaryPage extends StatelessWidget {
   const OrderSummaryPage({super.key});
 
   @override
-  State<OrderSummaryPage> createState() => _OrderSummaryPageState();
-}
-
-class _OrderSummaryPageState extends State<OrderSummaryPage> {
-  final _orderService = OrderService();
-  bool _loading = false;
-
-  Future<void> _confirm(Map<String, dynamic> args) async {
-    setState(() => _loading = true);
-    try {
-      final id = await _orderService.createOrder(
-        addressDetail: args['address'] as String,
-        pickupTime: args['pickupDate'] as DateTime,
-        deliveryTime: args['deliveryDate'] as DateTime,
-        totalPrice: args['total'] as int,
-      );
-      if (!mounted) return;
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppConstants.routeOrderSuccess,
-        ModalRoute.withName(AppConstants.routeHome),
-        arguments: id,
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Gagal membuat pesanan: $e')));
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-    final service = args['service'] as Service;
-    final kg = args['kg'] as int;
-    final total = args['total'] as int;
-    final address = args['address'] as String;
-    final pickup = args['pickupDate'] as DateTime;
-    final delivery = args['deliveryDate'] as DateTime;
+    final theme = Theme.of(context);
+    final args = ModalRoute.of(context)?.settings.arguments;
+
+    final data = args is Map<String, dynamic>
+        ? Map<String, dynamic>.from(args)
+        : <String, dynamic>{};
+
+    final service = data['service'] as Map<String, dynamic>?;
+    final address = data['address'] as String? ?? '-';
+    final note = data['note'] as String? ?? '-';
+    final pickupTime = data['pickupTime'] as TimeOfDay?;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ringkasan Pesanan')),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Layanan: ${service.name}',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      appBar: AppBar(
+        title: const Text('Ringkasan Pesanan'),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+        children: [
+          Text(
+            'Detail Layanan',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
             ),
-            const SizedBox(height: 8),
-            Text('Perkiraan berat: $kg kg'),
-            const SizedBox(height: 8),
-            Text('Pickup: $pickup'),
-            Text('Pengantaran: $delivery'),
-            const SizedBox(height: 8),
-            Text('Alamat: $address'),
-            const Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Total: Rp $total',
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: ListTile(
+              leading: Container(
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.primarySoft,
+                ),
+                padding: const EdgeInsets.all(10),
+                child: Icon(
+                  service?['icon'] as IconData? ??
+                      Icons.local_laundry_service_rounded,
+                  color: AppColors.primary,
+                ),
+              ),
+              title: Text(
+                service?['name'] as String? ?? 'Layanan tidak diketahui',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              subtitle: Text(
+                service?['subtitle'] as String? ?? '',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              trailing: Text(
+                'Rp ${(service?['price'] as int? ?? 0).toString()} / kg',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Alamat & Jadwal',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on_rounded,
+                          color: AppColors.primary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          address,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                ElevatedButton(
-                  onPressed: _loading ? null : () => _confirm(args),
-                  child: Text(_loading ? 'Memproses...' : 'Konfirmasi'),
-                ),
-              ],
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.access_time_rounded,
+                          color: AppColors.primary),
+                      const SizedBox(width: 8),
+                      Text(
+                        pickupTime == null
+                            ? '-'
+                            : 'Jam ${pickupTime.hour.toString().padLeft(2, '0')}:${pickupTime.minute.toString().padLeft(2, '0')}',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.sticky_note_2_outlined,
+                          color: AppColors.primary),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          note.isEmpty ? '-' : note,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Estimasi Biaya',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              child: Column(
+                children: [
+                  _rowPrice(
+                    theme,
+                    'Estimasi berat',
+                    '3 kg', // nanti bisa diganti input real
+                  ),
+                  const SizedBox(height: 6),
+                  _rowPrice(
+                    theme,
+                    'Harga per kg',
+                    'Rp ${(service?['price'] as int? ?? 0).toString()}',
+                  ),
+                  const Divider(height: 20),
+                  _rowPrice(
+                    theme,
+                    'Total estimasi',
+                    'Rp ${(3 * (service?['price'] as int? ?? 0)).toString()}',
+                    isBold: true,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+        child: FilledButton(
+          onPressed: () {
+            Navigator.of(context).pushNamed(
+              AppConstants.routeOrderSuccess,
+              arguments: data,
+            );
+          },
+          child: const Text('Konfirmasi Pesanan'),
         ),
       ),
+    );
+  }
+
+  Widget _rowPrice(
+    ThemeData theme,
+    String label,
+    String value, {
+    bool isBold = false,
+  }) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+        Text(
+          value,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,
+            color: isBold ? AppColors.textMain : AppColors.textMain,
+          ),
+        ),
+      ],
     );
   }
 }
